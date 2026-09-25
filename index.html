@@ -1819,13 +1819,16 @@ body::after {
    ========================================================= */
 const CONFIG = {
   /* ---- CRICKET MATCHES (live + upcoming) ----------------
-     provider 'cricapi' → CricketData.org (free key: https://cricketdata.org)
-     provider 'custom'  → your own JSON endpoint (format at the bottom of this file)
-     Leave apiKey '' (cricapi) or url '' (custom) to show demo data. */
+     provider 'sportmonks' → Sportmonks Cricket API v2 (https://my.sportmonks.com)
+                             apiKey = your API token
+     provider 'cricapi'    → CricketData.org  (url: 'https://api.cricapi.com/v1/currentMatches?offset=0&apikey=')
+     provider 'custom'     → your own JSON endpoint (format at the bottom of this file)
+     Leave apiKey '' to show demo data. */
   cricket: {
-    provider: 'cricapi',
-    url: 'https://api.cricapi.com/v1/currentMatches?offset=0&apikey=',
+    provider: 'sportmonks',
+    url: 'https://cricket.sportmonks.com/api/v2.0',
     apiKey: '',
+    upcomingDays: 7,        // sportmonks: how many days ahead for "Upcoming Matches"
   },
 
   /* ---- FOOTBALL MATCHES (live) --------------------------
@@ -2102,6 +2105,72 @@ function fromCricApi(json) {
   return { live, upcoming };
 }
 
+/* ---- Sportmonks Cricket v2 ---- */
+const smUnwrap = (x) => (x && typeof x === 'object' && 'data' in x && !Array.isArray(x) && Object.keys(x).length <= 3 ? x.data : x);
+const ymd = (d) => d.toISOString().slice(0, 10);
+
+async function loadSportmonks(c) {
+  const base = c.url.replace(/\/+$/, '');
+  const token = `api_token=${encodeURIComponent(c.apiKey)}`;
+  const inc = 'include=localteam,visitorteam,runs,league';
+  const from = new Date(), to = new Date(Date.now() + (c.upcomingDays || 7) * 86400000);
+
+  const liveReq = fetchJson(`${base}/livescores?${token}&${inc}`);
+  const upReq = fetchJson(`${base}/fixtures?${token}&include=localteam,visitorteam,league&filter[starts_between]=${ymd(from)},${ymd(to)}&sort=starting_at`)
+    .catch((err) => { console.warn('[SPORTS TUBE] Sportmonks upcoming failed:', err); return { data: [] }; });
+
+  const [liveJson, upJson] = await Promise.all([liveReq, upReq]);
+  if (liveJson && liveJson.error) throw new Error(liveJson.error.message || 'Sportmonks error');
+  return fromSportmonks(liveJson, upJson);
+}
+
+function fromSportmonks(liveJson, upJson) {
+  const teamOf = (t, fallback) => {
+    const o = smUnwrap(t) || {};
+    return ensureTeam({ name: o.name || fallback, short: o.code, logo: o.image_path || '' });
+  };
+  const formatOf = (f) => String(f.type || '').split('/')[0] || 'Cricket';
+  const ended = /finished|aban|cancl|postp/i;
+
+  const live = (smUnwrap(liveJson) || [])
+    .filter((f) => f.status !== 'NS' && !ended.test(f.status || ''))
+    .map((f) => {
+      const runs = smUnwrap(f.runs) || [];
+      const league = smUnwrap(f.league) || {};
+      const format = formatOf(f);
+      const multiDay = /test|day/i.test(f.type || '');
+      const side = (teamId) => {
+        const inns = runs.filter((r) => r.team_id === teamId).sort((a, b) => a.inning - b.inning);
+        if (!inns.length) return { score: '—', detail: 'Yet to bat' };
+        const last = inns[inns.length - 1];
+        const score = multiDay && inns.length > 1
+          ? inns.map((r) => `${r.score}/${r.wickets}`).join(' & ')
+          : `${last.score}/${last.wickets}`;
+        return { score, detail: `${last.overs} ov` };
+      };
+      return {
+        id: `sm-${f.id}`, sport: 'cricket',
+        accent: ACCENT_LIST[hashNum(league.name || format) % 5],
+        format,
+        competition: [league.name, f.round].filter(Boolean).join(' - ') || `Cricket - ${format}`,
+        home: { team: teamOf(f.localteam, 'Home'), ...side(f.localteam_id) },
+        away: { team: teamOf(f.visitorteam, 'Away'), ...side(f.visitorteam_id) },
+        note: f.note || f.status || '',
+        streamUrl: '',
+      };
+    });
+
+  const upcoming = (smUnwrap(upJson) || [])
+    .filter((f) => (f.status || 'NS') === 'NS' && new Date(f.starting_at) > new Date())
+    .slice(0, 8)
+    .map((f) => {
+      const w = fmtWhen(f.starting_at);
+      return { id: `smu-${f.id}`, day: w.day, time: w.time, home: teamOf(f.localteam, 'TBA'), away: teamOf(f.visitorteam, 'TBA'), format: formatOf(f) };
+    });
+
+  return { live, upcoming };
+}
+
 /* ---- API-Football ---- */
 function fromApiFootball(json) {
   const live = ((json && json.response) || []).map((f) => {
@@ -2143,6 +2212,10 @@ function fromCustom(json, sport) {
 
 async function loadCricket() {
   const c = CONFIG.cricket;
+  if (c.provider === 'sportmonks') {
+    if (!c.apiKey) return null;
+    return loadSportmonks(c);
+  }
   if (c.provider === 'cricapi') {
     if (!c.apiKey) return null;
     const json = await fetchJson(c.url + encodeURIComponent(c.apiKey));
