@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#050a16">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
 /*<![CDATA[*/
 /* =========================================================
@@ -945,13 +945,369 @@ body.is-filtering .split { margin-top: 0; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } }
 @keyframes pop { from { opacity: 0; transform: translateY(18px) scale(.97); } }
-.is-loaded .main > *, .is-loaded .rightbar > * { animation: rise .6s var(--ease) both; }
-.is-loaded .main > :nth-child(2) { animation-delay: .06s; }
-.is-loaded .main > :nth-child(3) { animation-delay: .12s; }
-.is-loaded .main > :nth-child(4) { animation-delay: .18s; }
-.is-loaded .main > :nth-child(n+5) { animation-delay: .24s; }
-.is-loaded .rightbar > :nth-child(1) { animation-delay: .1s; }
-.is-loaded .rightbar > :nth-child(2) { animation-delay: .2s; }
+/* =========================================================
+   BROADCAST THEME — motion + identity layer
+   ========================================================= */
+@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+/* Living background: slow aurora + stadium grid */
+body::before { inset: -10%; animation: aurora 28s ease-in-out infinite alternate; }
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(130,165,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(130,165,255,.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+@keyframes aurora {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+  100% { transform: translate3d(2%, -2%, 0) scale(1.04); }
+}
+
+/* Broadcast headline type */
+.slide__title, .section__title, .panel__title, .promo__title, .side-promo h3,
+.team__score, .match__mid--score, .tick__score, .strip-item__score, .modal__title { font-style: italic; }
+
+/* ---------- Live score strip ---------- */
+.score-strip {
+  position: relative; z-index: 51;
+  display: flex; align-items: stretch;
+  height: 34px;
+  background: linear-gradient(90deg, #081026, #0b1733 50%, #081026);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  font-size: 12.5px;
+}
+.score-strip__label {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 22px 0 16px;
+  font: italic 800 14px/1 var(--font-display); letter-spacing: .08em;
+  color: #fff;
+  background: linear-gradient(135deg, #ff3b5c, #e11d48);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+.score-strip__label .live-dot { background: #fff; box-shadow: 0 0 8px #fff; }
+.score-strip__viewport {
+  flex: 1; min-width: 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+.score-strip__track { display: flex; width: max-content; height: 100%; animation: marquee var(--dur, 40s) linear infinite; }
+.score-strip:hover .score-strip__track { animation-play-state: paused; }
+.strip-group { display: flex; align-items: center; }
+.strip-item {
+  display: flex; align-items: center; gap: 8px;
+  height: 100%; padding: 0 22px;
+  white-space: nowrap; color: var(--text-secondary);
+  border-right: 1px solid rgba(255,255,255,.06);
+  transition: color .2s, background .2s;
+}
+.strip-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.strip-item b { font-weight: 600; color: var(--text-primary); }
+.strip-item__score { font: 700 15px/1 var(--font-display); color: #fff; font-variant-numeric: tabular-nums; }
+.strip-item em { font-style: normal; font-size: 11px; color: var(--text-muted); }
+.strip-item .flag + .flag { margin-left: -6px; }
+.flag--xs { --s: 18px; box-shadow: 0 0 0 1.5px rgba(255,255,255,.2); }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ---------- Header ---------- */
+.brand__logo { position: relative; width: 40px; height: 40px; flex: none; }
+.brand__logo i {
+  position: absolute; inset: 0;
+  border-radius: 12px;
+  border: 1.5px solid rgba(34,211,238,.7);
+  animation: signal 2.8s ease-out infinite;
+  pointer-events: none;
+}
+.brand__logo i:nth-of-type(2) { animation-delay: 1.4s; }
+@keyframes signal { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.65); opacity: 0; } }
+.brand:hover .brand__mark { transform: rotate(-8deg) scale(1.05); }
+.brand__mark { transition: transform .4s cubic-bezier(.3,1.5,.5,1); }
+.brand__text strong {
+  font-style: italic;
+  background: linear-gradient(100deg, #fff 0%, #fff 42%, #67e8f9 50%, #fff 58%, #fff 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  animation: text-shine 6s linear infinite;
+}
+@keyframes text-shine { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+
+.topnav ul { position: relative; }
+.topnav__pill {
+  position: absolute; top: 0; left: 0;
+  height: 40px; width: 0;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  box-shadow: inset 0 0 0 1px rgba(130,165,255,.2), 0 8px 24px -12px rgba(47,123,255,.8);
+  opacity: 0;
+  transition: transform .5s cubic-bezier(.3,1.35,.5,1), width .5s cubic-bezier(.3,1.35,.5,1), opacity .25s;
+  pointer-events: none;
+}
+.topnav li:not(.topnav__pill) { position: relative; z-index: 1; }
+.topnav a:hover { background: transparent; }
+.topnav a .ico { transition: transform .3s cubic-bezier(.3,1.5,.5,1); }
+.topnav a:hover .ico { transform: translateY(-2px) scale(1.1); }
+.topnav a.is-active::after { animation: glow-line 2.4s ease-in-out infinite; }
+@keyframes glow-line { 50% { box-shadow: 0 0 20px var(--accent-cyan), 0 0 4px #fff; } }
+
+.search input:focus {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+    linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple)) border-box;
+}
+.bell .ico { transform-origin: 50% 12%; animation: bell 7s ease-in-out infinite; }
+@keyframes bell { 0%, 86%, 100% { rotate: 0deg; } 88% { rotate: 16deg; } 90% { rotate: -13deg; } 92% { rotate: 9deg; } 94% { rotate: -5deg; } }
+.avatar { overflow: visible; }
+.avatar::before {
+  content: "";
+  position: absolute; inset: -3px;
+  border-radius: 14px; padding: 1.5px;
+  background: conic-gradient(from var(--angle), var(--accent-cyan), var(--accent-purple), var(--accent-red), var(--accent-cyan));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spin 5s linear infinite;
+}
+
+/* ---------- Sidebar ---------- */
+.side-nav a .ico { transition: transform .3s cubic-bezier(.3,1.5,.5,1); }
+.side-nav a:hover .ico { transform: translateX(3px) scale(1.1); }
+.side-nav a.is-active {
+  background: linear-gradient(90deg, #2f7bff, #2563eb 40%, rgba(47,123,255,.45));
+  background-size: 200% 100%;
+  animation: active-flow 4s ease-in-out infinite alternate;
+}
+@keyframes active-flow { to { background-position: 100% 0; } }
+
+/* ---------- Hero ---------- */
+.hero::after {
+  content: "";
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+}
+.slide { z-index: 1; }
+.slide.is-active { z-index: 2; animation: wipe 1s var(--ease) both; }
+@keyframes wipe {
+  from { clip-path: polygon(0 0, 0 0, -25% 100%, 0 100%); }
+  to { clip-path: polygon(0 0, 125% 0, 100% 100%, 0 100%); }
+}
+.slide.is-active::before {
+  content: "";
+  position: absolute; top: -20%; bottom: -20%; left: -40%; z-index: 0;
+  width: 26%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+  transform: skewX(-20deg);
+  animation: glare 1.6s var(--ease) .35s both;
+  pointer-events: none;
+}
+@keyframes glare { to { left: 130%; } }
+.slide__side::before {
+  content: "";
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    repeating-linear-gradient(-60deg, rgba(255,255,255,.045) 0 2px, transparent 2px 16px),
+    linear-gradient(135deg, var(--panel), transparent 75%);
+}
+.slide__side--home::before { clip-path: polygon(0 0, 100% 0, 74% 100%, 0 100%); --panel: var(--c1-glow); }
+.slide__side--away::before { clip-path: polygon(26% 0, 100% 0, 100% 100%, 0 100%); --panel: var(--c2-glow); background: repeating-linear-gradient(60deg, rgba(255,255,255,.045) 0 2px, transparent 2px 16px), linear-gradient(225deg, var(--panel), transparent 75%); }
+.slide.is-active .slide__side--home { animation: side-l .9s var(--ease) both; }
+.slide.is-active .slide__side--away { animation: side-r .9s var(--ease) both; }
+@keyframes side-l { from { opacity: 0; transform: translateX(-40px); } }
+@keyframes side-r { from { opacity: 0; transform: translateX(40px); } }
+.slide__emblem { translate: calc(var(--mx, 0) * 16px) calc(var(--my, 0) * 12px); transition: translate .4s var(--ease); }
+.slide__code { font-style: italic; translate: calc(var(--mx, 0) * -30px) calc(var(--my, 0) * -16px); transition: translate .5s var(--ease); }
+.slide__emblem .flag { animation: emblem-float 5s ease-in-out infinite; }
+.slide__side--away .slide__emblem .flag { animation-delay: -2.5s; }
+@keyframes emblem-float { 50% { transform: translateY(-6px); } }
+.slide__title { display: flex; flex-direction: column; align-items: center; }
+.slide__title .vs {
+  display: inline-block;
+  margin: .16em 0;
+  padding: .1em .55em .12em;
+  font-size: .42em; line-height: 1; letter-spacing: .06em; text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #ff3b5c, #e11d48);
+  border-radius: 4px;
+  transform: skewX(-12deg);
+  box-shadow: 0 8px 24px -6px rgba(255,45,85,.9);
+}
+.hero__progress { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; height: 3px; background: rgba(255,255,255,.08); }
+.hero__progress span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--accent-red), #ff9fb1);
+  box-shadow: 0 0 12px var(--accent-red);
+  transform: scaleX(0); transform-origin: left;
+}
+.hero__progress span.run { animation: progress var(--hero-dur, 6.5s) linear forwards; }
+.hero.is-paused .hero__progress span { animation-play-state: paused; }
+@media (hover: hover) { .hero:hover .hero__progress span { animation-play-state: paused; } }
+@keyframes progress { to { transform: scaleX(1); } }
+.hero__count { position: absolute; left: 22px; bottom: 14px; z-index: 3; font: italic 700 14px/1 var(--font-display); letter-spacing: .06em; color: var(--text-secondary); }
+.hero__count b { font-size: 20px; color: #fff; }
+.hero__arrow { transition: background .2s, border-color .2s, transform .3s cubic-bezier(.3,1.5,.5,1); }
+.hero__arrow--prev:hover { transform: translateY(-50%) translateX(-3px); }
+.hero__arrow--next:hover { transform: translateY(-50%) translateX(3px); }
+
+/* ---------- Section headings: broadcast lower-third ---------- */
+.section__head { position: relative; padding-bottom: 12px; }
+.section__head::after, .panel__head::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(47,123,255,.7), rgba(34,211,238,.25) 35%, transparent 85%);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 1.1s var(--ease) .2s;
+}
+.panel__head { position: relative; padding-bottom: 12px; }
+.is-in .section__head::after, .is-in .panel__head::after, .is-in.panel .panel__head::after { transform: scaleX(1); }
+.section__title, .panel__title { position: relative; padding-left: 16px; }
+.section__title::before, .panel__title::before {
+  content: "";
+  position: absolute; left: 0; top: 12%; bottom: 12%;
+  width: 5px; border-radius: 2px;
+  background: linear-gradient(var(--accent-cyan), var(--accent-blue));
+  box-shadow: 0 0 12px rgba(34,211,238,.7);
+  transform: skewX(-14deg);
+}
+
+/* ---------- Card FX: spotlight, tilt, animated border ---------- */
+.fx-spot { --px: -300px; --py: -300px; }
+.fx-tilt {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+  transition: transform .35s var(--ease), border-color .25s, box-shadow .25s;
+}
+.fx-tilt:hover { --lift: -4px; transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift)); }
+.fx-border { position: relative; }
+.fx-border::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 2;
+  border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--angle), transparent 0 55%, rgba(var(--c-rgb, 34,211,238), .95) 72%, #fff 78%, transparent 86%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s;
+  animation: spin 4s linear infinite;
+  pointer-events: none;
+}
+.fx-border:hover::before, .fx-border.is-always::before { opacity: 1; }
+.match.fx-border::before { opacity: .5; }
+.match.fx-border:hover::before { opacity: 1; }
+@keyframes spin { to { --angle: 360deg; } }
+
+.match.fx-spot {
+  background:
+    radial-gradient(260px circle at var(--px) var(--py), rgba(var(--c-rgb), .2), transparent 60%),
+    linear-gradient(180deg, rgba(var(--c-rgb), .16), rgba(11,19,38,.85) 58%);
+}
+.match::after {
+  content: "";
+  position: absolute; left: 0; top: 0; z-index: 1;
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(var(--c-rgb)), transparent);
+  animation: scan 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(170%); } }
+.match:hover .team .flag { transform: scale(1.08); }
+.team .flag { transition: transform .35s cubic-bezier(.3,1.5,.5,1); }
+
+.cat.fx-spot {
+  background:
+    radial-gradient(220px circle at var(--px) var(--py), rgba(var(--c-rgb), .32), transparent 60%),
+    linear-gradient(135deg, rgba(var(--c-rgb), .22), rgba(14,22,44,.7) 70%);
+}
+.cat::after {
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: -60%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+  transform: skewX(-20deg);
+  transition: left .8s var(--ease);
+  pointer-events: none;
+}
+.cat:hover::after { left: 130%; }
+.cat__icon { transition: transform .45s cubic-bezier(.3,1.6,.5,1); }
+.cat:hover .cat__icon { transform: rotate(-8deg) scale(1.1); }
+
+.channel.fx-spot { background: radial-gradient(200px circle at var(--px) var(--py), rgba(34,211,238,.16), transparent 60%), var(--card-bg); }
+.channel__logo { transition: transform .45s var(--ease); }
+.channel:hover .channel__logo { transform: scale(1.04); }
+.hl.fx-spot, .news.fx-spot { background: radial-gradient(240px circle at var(--px) var(--py), rgba(47,123,255,.14), transparent 60%), var(--card-bg); }
+.hl__thumb .hl__bar { position: absolute; left: 0; bottom: 0; z-index: 2; height: 3px; width: 100%; background: var(--accent-red); transform: scaleX(0); transform-origin: left; transition: transform .8s var(--ease); }
+.hl:hover .hl__bar { transform: scaleX(.35); }
+
+/* On-air equaliser */
+.eq { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 9px; }
+.eq i { width: 2px; height: 100%; border-radius: 1px; background: currentColor; transform-origin: bottom; animation: eq .9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay: -.3s; }
+.eq i:nth-child(3) { animation-delay: -.6s; }
+@keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+/* Ticker */
+.tick { transition: background .2s, border-color .2s, transform .3s var(--ease); }
+.tick:hover { transform: translateX(4px); }
+.tick::before { animation: bar-pulse 2.2s ease-in-out infinite; }
+@keyframes bar-pulse { 50% { opacity: .45; } }
+
+/* Upcoming bell */
+.up__remind.is-on .ico { animation: bell-ring .6s ease-in-out; }
+@keyframes bell-ring { 25% { rotate: 18deg; } 50% { rotate: -14deg; } 75% { rotate: 8deg; } }
+.up { transition: background .2s; border-radius: 10px; }
+.up:hover { background: rgba(255,255,255,.03); }
+
+/* Promo */
+.promo__player { animation: float-y 6s ease-in-out infinite; }
+@keyframes float-y { 50% { transform: translateY(-8px); } }
+.promo__stadium::before { animation: flicker 5s linear infinite; }
+@keyframes flicker { 0%, 100% { opacity: .85; } 47% { opacity: .85; } 48% { opacity: .4; } 49% { opacity: .9; } 72% { opacity: .6; } 73% { opacity: .9; } }
+.side-promo__icon { animation: float 4s ease-in-out infinite, crown-glow 3s ease-in-out infinite; }
+@keyframes crown-glow { 50% { box-shadow: 0 10px 40px -4px rgba(251,191,36,.95); } }
+
+/* Score changed after a refresh */
+.is-updated .team__score, .is-updated .match__mid--score, .is-updated .tick__score { animation: flash 1.6s var(--ease); }
+@keyframes flash { 0%, 30% { color: var(--accent-gold); text-shadow: 0 0 18px rgba(251,191,36,.9); transform: scale(1.15); } }
+
+/* Click ripple */
+.chip, .channel__watch, .up__remind, .rail-btn { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute; z-index: 0;
+  width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.45);
+  transform: scale(0);
+  animation: ripple .65s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple { to { transform: scale(24); opacity: 0; } }
+
+/* Bottom nav indicator */
+.bottom-nav__pill {
+  position: absolute; top: 0; left: 0;
+  width: 0; height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+  box-shadow: 0 0 14px var(--accent-cyan);
+  transition: transform .5s cubic-bezier(.3,1.35,.5,1), width .5s cubic-bezier(.3,1.35,.5,1), opacity .25s;
+}
+.bottom-nav a.is-active .ico { animation: icon-pop .5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes icon-pop { 40% { transform: translateY(-4px) scale(1.2); } }
+
+/* Scroll reveal (only when JS is running) */
+.js [data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+.js [data-reveal].is-in { opacity: 1; transform: none; }
+.js [data-reveal].is-in:not(.is-done) .stagger > *,
+.js .stagger[data-reveal].is-in:not(.is-done) > * {
+  animation: card-in .65s var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms + .12s);
+}
+@keyframes card-in { from { opacity: 0; transform: translateY(20px) scale(.96); } }
+
+.modal__dialog { box-shadow: 0 40px 100px -20px rgba(0,0,0,.9), 0 0 0 1px rgba(34,211,238,.1), 0 0 80px -30px rgba(47,123,255,.6); }
 
 /* =========================================================
    RESPONSIVE
@@ -1112,6 +1468,13 @@ body.is-filtering .split { margin-top: 0; }
   .rail--channels { grid-auto-columns: 118px; }
 }
 
+@media (max-width: 767px) {
+  .score-strip { height: 30px; }
+  .score-strip__label { padding: 0 16px 0 12px; font-size: 12px; }
+  .slide__side::before { display: none; }
+  .hero__count { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -1154,13 +1517,19 @@ body.is-filtering .split { margin-top: 0; }
 </svg>
 
 <!-- ============ TOP NAVBAR ============ -->
+<!-- ============ LIVE SCORE STRIP (filled from live matches) ============ -->
+<div class="score-strip" id="scoreStrip" hidden>
+  <span class="score-strip__label"><span class="live-dot"></span>LIVE</span>
+  <div class="score-strip__viewport"><div class="score-strip__track" id="stripTrack"></div></div>
+</div>
+
 <header class="topbar" id="topbar">
   <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
     <svg class="ico"><use href="#i-menu"/></svg>
   </button>
 
   <a class="brand" href="#home" data-link="home" aria-label="SPORTS TUBE home">
-    <span class="brand__mark" aria-hidden="true"></span>
+    <span class="brand__logo" aria-hidden="true"><span class="brand__mark"></span><i></i><i></i></span>
     <span class="brand__text">
       <strong>SPORTS TUBE</strong>
       <small>Watch • Live Score • TV</small>
@@ -1169,6 +1538,7 @@ body.is-filtering .split { margin-top: 0; }
 
   <nav class="topnav" aria-label="Primary">
     <ul>
+      <li class="topnav__pill" id="navPill" aria-hidden="true"></li>
       <li><a href="#home" data-link="home" class="is-active"><svg class="ico"><use href="#i-home"/></svg>Home</a></li>
       <li><a href="#live" data-link="cricket"><svg class="ico"><use href="#i-cricket"/></svg>Cricket</a></li>
       <li><a href="#live" data-link="football"><svg class="ico"><use href="#i-football"/></svg>Football</a></li>
@@ -1228,7 +1598,7 @@ body.is-filtering .split { margin-top: 0; }
       <li><a href="#main" data-link="favourites"><svg class="ico ico--gold"><use href="#i-star"/></svg>Favourites<span class="count" id="favCount">0</span></a></li>
     </ul>
 
-    <div class="side-promo">
+    <div class="side-promo fx-border is-always" style="--c-rgb:251,191,36">
       <span class="side-promo__icon" aria-hidden="true"><svg class="ico"><use href="#i-crown"/></svg></span>
       <h3>Watch Live<br>Anytime, Anywhere</h3>
       <p>Your Favorite Sports<br>&amp; TV Channels in One Place</p>
@@ -1240,36 +1610,38 @@ body.is-filtering .split { margin-top: 0; }
   <main class="main" id="main">
 
     <!-- HERO — slides are rendered from `heroSlides` in script.js -->
-    <section class="hero" id="home" aria-roledescription="carousel" aria-label="Featured matches">
+    <section class="hero" id="home" data-reveal aria-roledescription="carousel" aria-label="Featured matches">
       <div class="hero__track" id="heroTrack"></div>
       <button class="hero__arrow hero__arrow--prev" id="heroPrev" aria-label="Previous slide"><svg class="ico"><use href="#i-left"/></svg></button>
       <button class="hero__arrow hero__arrow--next" id="heroNext" aria-label="Next slide"><svg class="ico"><use href="#i-right"/></svg></button>
       <div class="hero__dots" id="heroDots" role="tablist" aria-label="Choose slide"></div>
+      <div class="hero__count" aria-hidden="true"><b id="heroNum">01</b> / <span id="heroTotal">04</span></div>
+      <div class="hero__progress" aria-hidden="true"><span id="heroBar"></span></div>
     </section>
 
     <!-- SPORT CATEGORIES -->
-    <section class="categories" aria-label="Browse by category">
-      <a href="#live" class="cat" data-link="cricket" style="--c-rgb:34,197,94">
+    <section class="categories stagger" data-reveal aria-label="Browse by category">
+      <a href="#live" class="cat fx-spot fx-tilt" data-link="cricket" style="--c-rgb:34,197,94">
         <span class="cat__icon"><svg class="ico"><use href="#i-cricket"/></svg></span>
         <span class="cat__text"><strong>Cricket</strong><small>Live Matches &amp; Score</small></span>
         <svg class="ico cat__arrow"><use href="#i-arrow"/></svg>
       </a>
-      <a href="#live" class="cat" data-link="football" style="--c-rgb:47,123,255">
+      <a href="#live" class="cat fx-spot fx-tilt" data-link="football" style="--c-rgb:47,123,255">
         <span class="cat__icon"><svg class="ico"><use href="#i-football"/></svg></span>
         <span class="cat__text"><strong>Football</strong><small>Live Matches &amp; Score</small></span>
         <svg class="ico cat__arrow"><use href="#i-arrow"/></svg>
       </a>
-      <a href="#tv" class="cat" data-link="tv" style="--c-rgb:139,92,246">
+      <a href="#tv" class="cat fx-spot fx-tilt" data-link="tv" style="--c-rgb:139,92,246">
         <span class="cat__icon"><svg class="ico"><use href="#i-tv"/></svg></span>
         <span class="cat__text"><strong>Live TV</strong><small id="tvCount">Live Channels</small></span>
         <svg class="ico cat__arrow"><use href="#i-arrow"/></svg>
       </a>
-      <a href="#live" class="cat" data-link="live" style="--c-rgb:255,45,85">
+      <a href="#live" class="cat fx-spot fx-tilt" data-link="live" style="--c-rgb:255,45,85">
         <span class="cat__icon"><svg class="ico"><use href="#i-live"/></svg></span>
         <span class="cat__text"><strong>Live Now</strong><small>Live Events</small></span>
         <svg class="ico cat__arrow"><use href="#i-arrow"/></svg>
       </a>
-      <a href="#highlights" class="cat" data-link="highlights" style="--c-rgb:255,138,31">
+      <a href="#highlights" class="cat fx-spot fx-tilt" data-link="highlights" style="--c-rgb:255,138,31">
         <span class="cat__icon"><svg class="ico"><use href="#i-play"/></svg></span>
         <span class="cat__text"><strong>Highlights</strong><small>Top Moments</small></span>
         <svg class="ico cat__arrow"><use href="#i-arrow"/></svg>
@@ -1277,7 +1649,7 @@ body.is-filtering .split { margin-top: 0; }
     </section>
 
     <!-- LIVE MATCHES — rendered from `liveMatches` -->
-    <section class="section" id="live" data-section>
+    <section class="section" id="live" data-section data-reveal>
       <div class="section__head">
         <h2 class="section__title"><span class="live-dot live-dot--lg"></span>Live Matches</h2>
         <div class="section__tools">
@@ -1293,12 +1665,12 @@ body.is-filtering .split { margin-top: 0; }
           <a href="#live" class="view-all" data-link="live">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
         </div>
       </div>
-      <div class="rail" id="liveRail"></div>
+      <div class="rail stagger" id="liveRail"></div>
       <p class="rail-empty" id="liveEmpty" hidden>No live matches right now. Check the upcoming list below.</p>
     </section>
 
     <!-- LIVE TV CHANNELS — rendered from `tvChannels` -->
-    <section class="section" id="tv" data-section>
+    <section class="section" id="tv" data-section data-reveal>
       <div class="section__head">
         <h2 class="section__title"><svg class="ico ico--purple"><use href="#i-tv"/></svg>Live TV Channels</h2>
         <div class="section__tools">
@@ -1309,37 +1681,37 @@ body.is-filtering .split { margin-top: 0; }
           <a href="#tv" class="view-all" data-link="channels">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
         </div>
       </div>
-      <div class="rail rail--channels" id="channelRail"></div>
+      <div class="rail rail--channels stagger" id="channelRail"></div>
       <p class="rail-empty" id="channelEmpty" hidden>Channel list could not be loaded. Check the M3U playlist link in the settings.</p>
     </section>
 
     <div class="split">
       <!-- HIGHLIGHTS — rendered from `highlights` -->
-      <section class="section" id="highlights" data-section>
+      <section class="section" id="highlights" data-section data-reveal>
         <div class="section__head">
           <h2 class="section__title"><svg class="ico ico--green"><use href="#i-play"/></svg>Latest Highlights</h2>
           <a href="#highlights" class="view-all" data-link="highlights">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
         </div>
-        <div class="hl-grid" id="highlightGrid"></div>
+        <div class="hl-grid stagger" id="highlightGrid"></div>
       </section>
 
       <!-- UPCOMING — rendered from `upcomingMatches` -->
-      <section class="section panel" id="upcoming" data-section>
+      <section class="section panel" id="upcoming" data-section data-reveal>
         <div class="panel__head">
           <h2 class="panel__title"><svg class="ico ico--cyan"><use href="#i-calendar"/></svg>Upcoming Matches</h2>
           <a href="#upcoming" class="view-all" data-link="upcoming">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
         </div>
-        <ul class="up-list" id="upcomingList"></ul>
+        <ul class="up-list stagger" id="upcomingList"></ul>
       </section>
     </div>
 
     <!-- SPORTS NEWS — rendered from `newsItems` -->
-    <section class="section" id="news" data-section>
+    <section class="section" id="news" data-section data-reveal>
       <div class="section__head">
         <h2 class="section__title"><svg class="ico ico--cyan"><use href="#i-news"/></svg>Sports News</h2>
         <a href="#news" class="view-all" data-link="news">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
-      <div class="news-grid" id="newsGrid"></div>
+      <div class="news-grid stagger" id="newsGrid"></div>
     </section>
 
     <!-- SEARCH / FAVOURITES EMPTY STATE -->
@@ -1353,15 +1725,15 @@ body.is-filtering .split { margin-top: 0; }
 
   <!-- ============ RIGHT SIDEBAR ============ -->
   <aside class="rightbar" aria-label="Live scores and offers">
-    <section class="panel ticker" id="score" data-section>
+    <section class="panel ticker" id="score" data-section data-reveal>
       <div class="panel__head">
         <h2 class="panel__title"><span class="live-dot live-dot--lg"></span>Live Match Ticker</h2>
         <a href="#live" class="view-all" data-link="live">View All <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
-      <ul class="ticker__list" id="tickerList"></ul>
+      <ul class="ticker__list stagger" id="tickerList"></ul>
     </section>
 
-    <section class="promo" aria-label="Promotion">
+    <section class="promo fx-border is-always" data-reveal aria-label="Promotion" style="--c-rgb:34,197,94">
       <div class="promo__stadium" aria-hidden="true"></div>
       <!-- Player silhouette placeholder. Replace with <img class="promo__player" src="assets/player.png" alt=""> if you have a licensed image. -->
       <svg class="promo__player" viewBox="0 0 200 260" aria-hidden="true">
@@ -1394,6 +1766,7 @@ body.is-filtering .split { margin-top: 0; }
 
 <!-- ============ MOBILE BOTTOM NAV ============ -->
 <nav class="bottom-nav" aria-label="Mobile">
+  <span class="bottom-nav__pill" id="bottomPill" aria-hidden="true"></span>
   <a href="#home" data-link="home" class="is-active"><svg class="ico"><use href="#i-home"/></svg>Home</a>
   <a href="#live" data-link="cricket"><svg class="ico"><use href="#i-cricket"/></svg>Cricket</a>
   <a href="#live" data-link="football"><svg class="ico"><use href="#i-football"/></svg>Football</a>
@@ -1843,8 +2216,23 @@ async function loadMatches(first = false) {
   if (first) { buildHero(); renderHero(); initHero(); }
   renderLive();
   renderTicker();
+  renderStrip();
   renderUpcoming();
   applyFilters();
+  flashChangedScores();
+}
+
+/* Highlights scores that changed since the last refresh */
+const lastScores = new Map();
+function flashChangedScores() {
+  liveMatches.forEach((m) => {
+    const key = `${m.home.score}|${m.away.score}`;
+    const prev = lastScores.get(m.id);
+    if (prev !== undefined && prev !== key) {
+      $$(`[data-id="${CSS.escape(m.id)}"], [data-id="${CSS.escape('t-' + m.id)}"]`).forEach((el) => el.classList.add('is-updated'));
+    }
+    lastScores.set(m.id, key);
+  });
 }
 
 /* =========================================================
@@ -1939,7 +2327,7 @@ function renderHero() {
           ${s.status === 'live'
             ? '<span class="badge-live badge-live--lg"><span class="live-dot"></span>LIVE</span>'
             : '<span class="badge-soon">UPCOMING</span>'}
-          <h2 class="slide__title">${esc(shortName(s.home))}<span class="vs">vs</span>${esc(shortName(s.away))}</h2>
+          <h2 class="slide__title"><span>${esc(shortName(s.home))}</span><span class="vs">vs</span><span>${esc(shortName(s.away))}</span></h2>
           <p class="slide__meta">${s.meta.map((m) => `<span>${esc(m)}</span>`).join('')}</p>
           <button class="btn btn--red btn--lg" data-play="hero:${i}" tabindex="${active ? 0 : -1}">
             <svg class="ico"><use href="#i-play-solid"/></svg>${s.status === 'live' ? 'WATCH LIVE' : 'WATCH PREVIEW'}
@@ -1977,7 +2365,7 @@ function matchCard(m) {
        </div>`;
 
   return `
-    <article class="match" style="--c-rgb:${rgb}" tabindex="0" aria-label="Watch ${esc(label)}"
+    <article class="match fx-spot fx-tilt fx-border" style="--c-rgb:${rgb}" tabindex="0" aria-label="Watch ${esc(label)}"
              data-item data-id="${esc(m.id)}" data-sport="${m.sport}" data-play="match:${esc(m.id)}"
              data-search="${searchKey(teamWords(m.home.team), teamWords(m.away.team), m.competition, m.format, m.sport, 'live')}">
       <div class="match__top">${LIVE_BADGE}<span class="match__comp">${esc(m.competition)}</span>${favBtn(m.id, label)}</div>
@@ -2011,11 +2399,11 @@ function channelLogo(c) {
 }
 function renderChannels() {
   $('#channelRail').innerHTML = tvChannels.map((c) => `
-    <article class="channel${state.currentChannel === c.id ? ' is-playing' : ''}" data-item data-id="${esc(c.id)}"
+    <article class="channel fx-spot fx-tilt fx-border${state.currentChannel === c.id ? ' is-playing' : ''}" data-item data-id="${esc(c.id)}"
              data-play="channel:${esc(c.id)}" data-search="${searchKey(c.name, c.short, c.group, 'tv channel live')}">
       <div class="channel__logo" style="--c1:${c.colors[0]};--c2:${c.colors[1]}" aria-hidden="true">${channelLogo(c)}</div>
       <p class="channel__name" title="${esc(c.name)}">${esc(c.name)}</p>
-      <div class="channel__row">${LIVE_BADGE}${favBtn(c.id, c.name)}</div>
+      <div class="channel__row"><span class="badge-live"><span class="eq"><i></i><i></i><i></i></span>LIVE</span>${favBtn(c.id, c.name)}</div>
       <button class="channel__watch" data-play="channel:${esc(c.id)}" aria-label="Watch ${esc(c.name)}">
         <svg class="ico"><use href="#i-play-solid"/></svg>Watch
       </button>
@@ -2028,12 +2416,13 @@ function renderHighlights() {
     const thumbStyle = `--c1:${rgba(team(h.home).color, .55)};--c2:${rgba(team(h.away).color, .55)};` +
       (h.thumbnail ? `background-image:url('${esc(h.thumbnail)}');` : '');
     return `
-      <article class="hl" tabindex="0" aria-label="Play ${esc(h.title)} highlights" data-item data-id="${h.id}"
+      <article class="hl fx-spot" tabindex="0" aria-label="Play ${esc(h.title)} highlights" data-item data-id="${h.id}"
                data-play="highlight:${h.id}" data-search="${searchKey(h.title, h.comp, teamWords(h.home), teamWords(h.away), 'highlights')}">
         <div class="hl__thumb">
           <div class="hl__img" style="${thumbStyle}">${h.thumbnail ? '' : teamBadge(h.home, 'md') + teamBadge(h.away, 'md')}</div>
           <span class="hl__play" aria-hidden="true"></span>
           <span class="hl__dur">${esc(h.duration)}</span>
+          <span class="hl__bar"></span>
         </div>
         <div class="hl__info">
           <h3 class="hl__title">${esc(h.title)}</h3>
@@ -2059,7 +2448,7 @@ function renderUpcoming() {
 
 function renderNews() {
   $('#newsGrid').innerHTML = newsItems.map((n) => `
-    <article class="news" data-item data-id="${n.id}" data-search="${searchKey(n.tag, n.title, 'news')}">
+    <article class="news fx-spot" data-item data-id="${n.id}" data-search="${searchKey(n.tag, n.title, 'news')}">
       <span class="news__tag">${esc(n.tag)}</span>
       <h3 class="news__title">${esc(n.title)}</h3>
       <span class="news__time">${esc(n.time)}</span>
@@ -2068,10 +2457,22 @@ function renderNews() {
 /* =========================================================
    HERO CAROUSEL
    ========================================================= */
-let heroTimer = null;
+/* Autoplay is driven by the progress bar animation: when the bar
+   fills, the next slide shows. Hover / focus / modal pauses the bar. */
+const HERO_SECONDS = 6.5;
+
+function restartBar() {
+  const bar = $('#heroBar');
+  if (!bar) return;
+  bar.classList.remove('run');
+  if (reduceMotion || heroSlides.length < 2) return;
+  void bar.offsetWidth;
+  bar.classList.add('run');
+}
 
 function goToSlide(i) {
   const n = heroSlides.length;
+  if (!n) return;
   state.heroIndex = (i + n) % n;
   $$('.slide').forEach((el, idx) => {
     const on = idx === state.heroIndex;
@@ -2083,40 +2484,156 @@ function goToSlide(i) {
     d.classList.toggle('is-active', idx === state.heroIndex);
     d.setAttribute('aria-selected', String(idx === state.heroIndex));
   });
+  $('#heroNum').textContent = String(state.heroIndex + 1).padStart(2, '0');
+  restartBar();
 }
-function startHero() {
-  if (reduceMotion || heroSlides.length < 2) return;
-  stopHero();
-  heroTimer = setInterval(() => goToSlide(state.heroIndex + 1), 6500);
-}
-function stopHero() { clearInterval(heroTimer); }
+function startHero() { $('#home').classList.remove('is-paused'); }
+function stopHero() { $('#home').classList.add('is-paused'); }
 
 function initHero() {
   const hero = $('#home');
-  $('#heroPrev').addEventListener('click', () => { goToSlide(state.heroIndex - 1); startHero(); });
-  $('#heroNext').addEventListener('click', () => { goToSlide(state.heroIndex + 1); startHero(); });
+  hero.style.setProperty('--hero-dur', `${HERO_SECONDS}s`);
+  $('#heroTotal').textContent = String(heroSlides.length).padStart(2, '0');
+  $('#heroNum').textContent = String(state.heroIndex + 1).padStart(2, '0');
+  $('.hero__count').hidden = heroSlides.length < 2;
+  $('.hero__progress').hidden = heroSlides.length < 2;
+
+  $('#heroBar').addEventListener('animationend', () => goToSlide(state.heroIndex + 1));
+  $('#heroPrev').addEventListener('click', () => goToSlide(state.heroIndex - 1));
+  $('#heroNext').addEventListener('click', () => goToSlide(state.heroIndex + 1));
   $('#heroDots').addEventListener('click', (e) => {
     const dot = e.target.closest('[data-dot]');
-    if (dot) { goToSlide(+dot.dataset.dot); startHero(); }
+    if (dot) goToSlide(+dot.dataset.dot);
   });
-  hero.addEventListener('mouseenter', stopHero);
-  hero.addEventListener('mouseleave', startHero);
   hero.addEventListener('focusin', stopHero);
-  hero.addEventListener('focusout', startHero);
+  hero.addEventListener('focusout', () => { if ($('#playerModal').hidden) startHero(); });
   hero.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') goToSlide(state.heroIndex - 1);
     if (e.key === 'ArrowRight') goToSlide(state.heroIndex + 1);
   });
 
+  // Mouse parallax on team emblems
+  if (finePointer && !reduceMotion) {
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+      hero.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+    });
+    hero.addEventListener('pointerleave', () => { hero.style.setProperty('--mx', 0); hero.style.setProperty('--my', 0); });
+  }
+
   let startX = 0;
-  hero.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; stopHero(); }, { passive: true });
+  hero.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
   hero.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].clientX - startX;
     if (Math.abs(dx) > 40) goToSlide(state.heroIndex + (dx < 0 ? 1 : -1));
-    startHero();
   });
-  document.addEventListener('visibilitychange', () => (document.hidden ? stopHero() : startHero()));
-  startHero();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopHero(); else if ($('#playerModal').hidden) startHero();
+  });
+  restartBar();
+}
+
+/* =========================================================
+   LIVE SCORE STRIP (marquee under the top edge)
+   ========================================================= */
+function renderStrip() {
+  const strip = $('#scoreStrip');
+  if (!tickerMatches.length) { strip.hidden = true; return; }
+  strip.hidden = false;
+  const item = (t, copy) => `
+    <button class="strip-item" data-play="match:${esc(t.matchId)}"${copy ? ' tabindex="-1"' : ''}>
+      <span class="tick__flags">${teamBadge(t.home, 'xs')}${teamBadge(t.away, 'xs')}</span>
+      <b>${esc(t.label)}</b>
+      <span class="strip-item__score">${esc(t.score)}${t.extra ? ` <small>(${esc(t.extra)})</small>` : ''}</span>
+      <em>${esc(t.comp)}</em>
+    </button>`;
+  const group = (copy) => `<div class="strip-group"${copy ? ' aria-hidden="true"' : ''}>${tickerMatches.map((t) => item(t, copy)).join('')}</div>`;
+  const track = $('#stripTrack');
+  track.innerHTML = group(false) + group(true);
+  track.style.setProperty('--dur', `${Math.max(24, tickerMatches.length * 7)}s`);
+}
+
+/* =========================================================
+   MOTION: nav pills, scroll reveal, card spotlight + tilt, ripple
+   ========================================================= */
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const pills = [];
+
+function initPills() {
+  [['.topnav ul', '#navPill'], ['.bottom-nav', '#bottomPill']].forEach(([listSel, pillSel]) => {
+    const list = $(listSel), pill = $(pillSel);
+    if (!list || !pill) return;
+    const moveTo = (el) => {
+      if (!el || !el.offsetParent) { pill.style.opacity = 0; return; }
+      const lr = list.getBoundingClientRect(), r = el.getBoundingClientRect();
+      pill.style.opacity = 1;
+      pill.style.width = `${r.width}px`;
+      pill.style.transform = `translateX(${r.left - lr.left}px)`;
+    };
+    const toActive = () => moveTo($('a.is-active', list));
+    list.addEventListener('pointerover', (e) => {
+      const a = e.target.closest('a');
+      if (a && finePointer) moveTo(a);
+    });
+    list.addEventListener('pointerleave', toActive);
+    pills.push(toActive);
+  });
+  movePills();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(movePills);
+}
+const movePills = () => pills.forEach((fn) => fn());
+
+function setStagger() {
+  $$('.stagger').forEach((box) => {
+    let i = 0;
+    [...box.children].forEach((el) => { if (!el.hidden) el.style.setProperty('--i', Math.min(i++, 10)); });
+  });
+}
+
+function initReveal() {
+  const els = $$('[data-reveal]');
+  const done = (el) => { el.classList.add('is-in'); setTimeout(() => el.classList.add('is-done'), 1600); };
+  if (!('IntersectionObserver' in window) || reduceMotion) { els.forEach(done); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { done(en.target); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach((el) => io.observe(el));
+}
+
+function initCardFx() {
+  document.addEventListener('pointermove', (e) => {
+    const el = e.target.closest && e.target.closest('.fx-spot');
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    el.style.setProperty('--px', `${x}px`);
+    el.style.setProperty('--py', `${y}px`);
+    if (finePointer && !reduceMotion && el.classList.contains('fx-tilt')) {
+      el.style.setProperty('--ry', `${((x / r.width - 0.5) * 8).toFixed(2)}deg`);
+      el.style.setProperty('--rx', `${((0.5 - y / r.height) * 8).toFixed(2)}deg`);
+    }
+  }, { passive: true });
+  document.addEventListener('pointerout', (e) => {
+    const el = e.target.closest && e.target.closest('.fx-tilt');
+    if (el && !el.contains(e.relatedTarget)) {
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    }
+  });
+  document.addEventListener('pointerdown', (e) => {
+    const host = e.target.closest && e.target.closest('.btn, .chip, .channel__watch, .up__remind, .rail-btn');
+    if (!host || reduceMotion) return;
+    const r = host.getBoundingClientRect();
+    const dot = document.createElement('span');
+    dot.className = 'ripple';
+    dot.style.left = `${e.clientX - r.left}px`;
+    dot.style.top = `${e.clientY - r.top}px`;
+    host.appendChild(dot);
+    dot.addEventListener('animationend', () => dot.remove());
+  });
 }
 
 /* =========================================================
@@ -2153,6 +2670,7 @@ function applyFilters() {
       $('#noResultsText').textContent = `Nothing matches “${state.query.trim()}”. Try a team, competition or channel, like India, UCL or ESPN.`;
     }
   }
+  setStagger();
 }
 
 function setSport(sport) {
@@ -2220,6 +2738,7 @@ const navMap = {
 
 function setActive(key) {
   $$('[data-link]').forEach((el) => el.classList.toggle('is-active', el.dataset.link === key));
+  movePills();
 }
 
 function scrollToEl(el) {
@@ -2506,7 +3025,7 @@ function initEvents() {
   $('#bellBtn').addEventListener('click', () => toast('You’re all caught up. No new notifications.'));
   $('#profileBtn').addEventListener('click', () => toast('Sign in to sync favourites across devices. Coming soon.'));
 
-  window.addEventListener('resize', () => { if (window.innerWidth >= 1280) closeDrawer(); }, { passive: true });
+  window.addEventListener('resize', () => { if (window.innerWidth >= 1280) closeDrawer(); movePills(); }, { passive: true });
 }
 
 /* =========================================================
@@ -2520,6 +3039,7 @@ function startRefresh() {
 }
 
 async function init() {
+  document.documentElement.classList.add('js');
   $('#year').textContent = new Date().getFullYear();
   skeletons();
   renderHighlights();
@@ -2527,7 +3047,9 @@ async function init() {
   updateFavCount();
   initSearch();
   initEvents();
-  requestAnimationFrame(() => document.body.classList.add('is-loaded'));
+  initPills();
+  initCardFx();
+  initReveal();
   await Promise.all([loadMatches(true), loadChannels()]);
   startRefresh();
 }
